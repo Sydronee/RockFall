@@ -2,25 +2,24 @@ import React from 'react';
 import { AlertTriangle, CheckCircle, Users, Play } from 'lucide-react';
 
 interface ActionPlanProps {
+  aiConfidence?: number;
+  riskLevel?: number;
   onSimulateScenario?: () => void;
 }
 
-const ActionPlan: React.FC<ActionPlanProps> = ({ onSimulateScenario }) => {
-  const aiConfidence = 89;
+const ActionPlan: React.FC<ActionPlanProps> = ({ aiConfidence = 89, riskLevel = 65, onSimulateScenario }) => {
 
   const handleAcknowledgeAlert = () => {
-    console.log('Alert acknowledged');
+    // In real app, would send acknowledgement to backend
   };
 
   const handleDispatchTeam = () => {
-    console.log('Field team dispatched');
+    // In real app, would dispatch field team
   };
 
   const handleRunSimulation = () => {
     if (onSimulateScenario) {
       onSimulateScenario();
-    } else {
-      console.log('Running simulation');
     }
   };
 
@@ -128,7 +127,7 @@ const ActionPlan: React.FC<ActionPlanProps> = ({ onSimulateScenario }) => {
         <div className="emergency-contact">
           <div className="emergency-header">
             <AlertTriangle size={16} />
-            <span>Emergency Protocol</span>
+            <span>Emergency Protocol{riskLevel >= 80 ? ' — ACTIVE' : ''}</span>
           </div>
           <div className="contact-info">
             <p>If risk escalates to 80%+, immediately contact:</p>

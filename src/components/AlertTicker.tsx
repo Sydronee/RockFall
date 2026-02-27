@@ -45,11 +45,9 @@ const AlertTicker: React.FC = () => {
   const [isAnimating, setIsAnimating] = useState(true);
 
   useEffect(() => {
-    console.log('AlertTicker mounted, isAnimating:', isAnimating);
-    
     // Simulate new alerts being added periodically
     const interval = setInterval(() => {
-      if (Math.random() > 0.6) { // 40% chance to add new alert
+      if (Math.random() > 0.6) {
         const alertMessages = [
           `Zone ${['A', 'B', 'C', 'D'][Math.floor(Math.random() * 4)]}${Math.floor(Math.random() * 5) + 1} - Routine sensor check complete`,
           `Automated drilling analysis complete for Sector ${Math.floor(Math.random() * 10) + 1}`,
@@ -69,15 +67,11 @@ const AlertTicker: React.FC = () => {
           message: alertMessages[Math.floor(Math.random() * alertMessages.length)]
         };
         
-        console.log('Adding new alert:', newAlert);
         setCurrentAlerts(prev => [newAlert, ...prev.slice(0, 9)]);
       }
-    }, 8000); // Every 8 seconds for testing
+    }, 8000);
 
-    return () => {
-      console.log('AlertTicker unmounting');
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, []);
 
   const getSeverityColor = (severity: string) => {
@@ -98,7 +92,6 @@ const AlertTicker: React.FC = () => {
   };
 
   const toggleAnimation = () => {
-    console.log('Toggling animation from', isAnimating, 'to', !isAnimating);
     setIsAnimating(!isAnimating);
   };
 
@@ -113,6 +106,7 @@ const AlertTicker: React.FC = () => {
           <button 
             className={`control-btn ${isAnimating ? 'active' : ''}`}
             onClick={toggleAnimation}
+            aria-label={isAnimating ? 'Pause alert feed' : 'Resume alert feed'}
           >
             {isAnimating ? '⏸️' : '▶️'}
           </button>
@@ -141,11 +135,6 @@ const AlertTicker: React.FC = () => {
               <span className="alert-separator">•</span>
             </div>
           ))}
-        </div>
-        
-        {/* Debug overlay to show animation state */}
-        <div className="animation-debug">
-          Animation: {isAnimating ? 'ON' : 'OFF'} | Alerts: {currentAlerts.length}
         </div>
       </div>
       

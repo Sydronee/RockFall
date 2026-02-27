@@ -34,7 +34,7 @@ const Header: React.FC = () => {
       </div>
       
       <div className="header-center">
-        <h2>Site Overview: Blackwater Canyon Mine</h2>
+        <h2>Site Overview: Ironstone Ridge Quarry</h2>
       </div>
       
       <div className="header-right">

@@ -85,6 +85,9 @@ const DigitalTwin: React.FC<DigitalTwinProps> = ({ onZoneClick }) => {
             <div
               key={zone.id}
               className="zone-marker"
+              role="button"
+              tabIndex={0}
+              aria-label={`${zone.name} - Status: ${zone.status}`}
               style={{
                 top: zone.position.top,
                 left: zone.position.left,
@@ -92,6 +95,7 @@ const DigitalTwin: React.FC<DigitalTwinProps> = ({ onZoneClick }) => {
                 boxShadow: `0 0 20px ${getZoneColor(zone.status)}40`
               }}
               onClick={() => onZoneClick(zone.id)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onZoneClick(zone.id); } }}
             >
               <div className="zone-pulse"></div>
               <div className="zone-label">

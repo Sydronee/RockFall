@@ -72,6 +72,7 @@ const MissionControlDashboard: React.FC<MissionControlDashboardProps> = ({ onZon
         className="floating-mobile-btn"
         onClick={() => onMobileAccess('WO-C4-0916')}
         title="Open Mobile Work Order (Press M)"
+        aria-label="Open Mobile Work Order"
       >
         📱
       </button>

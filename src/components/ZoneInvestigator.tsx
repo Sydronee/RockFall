@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, AlertTriangle } from 'lucide-react';
-import VisualEvidence from './VisualEvidence.tsx';
-import DataAnalysis from './DataAnalysis.tsx';
-import ActionPlan from './ActionPlan.tsx';
+import VisualEvidence from './VisualEvidence';
+import DataAnalysis from './DataAnalysis';
+import ActionPlan from './ActionPlan';
 
 interface ZoneInvestigatorProps {
   zoneId: string;
@@ -18,6 +18,46 @@ interface ZoneData {
   lastUpdate: string;
 }
 
+// Zone data lookup - defined outside component to avoid re-creation on each render
+const zoneDataMap: Record<string, ZoneData> = {
+  zone1: { 
+    name: "Haul Road Sector 7", 
+    riskLevel: 25, 
+    aiConfidence: 78.5,
+    minesite: "Ironstone Ridge Quarry",
+    lastUpdate: "2025-09-16 14:32:00"
+  },
+  zone2: { 
+    name: "North Face - Bench B2", 
+    riskLevel: 35, 
+    aiConfidence: 82.1,
+    minesite: "Ironstone Ridge Quarry",
+    lastUpdate: "2025-09-16 14:28:00"
+  },
+  zone3: { 
+    name: "South Wall - Bench C4", 
+    riskLevel: 65, 
+    aiConfidence: 89.3,
+    minesite: "Ironstone Ridge Quarry",
+    lastUpdate: "2025-09-16 14:25:00"
+  },
+  sector7g: {
+    name: "Sector 7G - Overhang",
+    riskLevel: 98,
+    aiConfidence: 97.8,
+    minesite: "Ironstone Ridge Quarry",
+    lastUpdate: "2025-09-16 14:35:00"
+  }
+};
+
+const defaultZoneData: ZoneData = { 
+  name: "Unknown Zone", 
+  riskLevel: 50, 
+  aiConfidence: 70.0,
+  minesite: "Ironstone Ridge Quarry",
+  lastUpdate: "2025-09-16 14:30:00"
+};
+
 const ZoneInvestigator: React.FC<ZoneInvestigatorProps> = ({
   zoneId,
   onBack,
@@ -26,114 +66,52 @@ const ZoneInvestigator: React.FC<ZoneInvestigatorProps> = ({
   // State for critical alert management
   const [isCriticalAlert, setIsCriticalAlert] = useState(false);
   const [isAlertAcknowledged, setIsAlertAcknowledged] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Map zone IDs to zone data with new critical scenario
-  const getZoneData = (id: string): ZoneData => {
-    const zoneMap: Record<string, ZoneData> = {
-      zone1: { 
-        name: "Haul Road Sector 7", 
-        riskLevel: 25, 
-        aiConfidence: 78.5,
-        minesite: "Ironstone Ridge Quarry",
-        lastUpdate: "2025-09-16 14:32:00"
-      },
-      zone2: { 
-        name: "North Face - Bench B2", 
-        riskLevel: 35, 
-        aiConfidence: 82.1,
-        minesite: "Ironstone Ridge Quarry",
-        lastUpdate: "2025-09-16 14:28:00"
-      },
-      zone3: { 
-        name: "South Wall - Bench C4", 
-        riskLevel: 65, 
-        aiConfidence: 89.3,
-        minesite: "Ironstone Ridge Quarry",
-        lastUpdate: "2025-09-16 14:25:00"
-      },
-      // Critical scenario - Sector 7G Overhang
-      "sector7g": {
-        name: "Sector 7G - Overhang",
-        riskLevel: 98,
-        aiConfidence: 97.8,
-        minesite: "Ironstone Ridge Quarry",
-        lastUpdate: "2025-09-16 14:35:00"
-      }
-    };
-    return zoneMap[id] || { 
-      name: "Unknown Zone", 
-      riskLevel: 50, 
-      aiConfidence: 70.0,
-      minesite: "Ironstone Ridge Quarry",
-      lastUpdate: "2025-09-16 14:30:00"
-    };
-  };
-
-  const zoneData = getZoneData(zoneId);
+  const zoneData = zoneDataMap[zoneId] || defaultZoneData;
 
   // Critical Alert Effect - triggers when AI confidence > 92.5%
   useEffect(() => {
-    if (zoneData.aiConfidence > 92.5 && !isAlertAcknowledged) {
-      setIsCriticalAlert(true);
-      
-      // Create audio using Web Audio API for cross-browser compatibility
-      // Generate a synthesized alarm sound
-      try {
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-        oscillator.type = 'square';
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.2);
-        
-        // Set up repeating alarm
-        const alarmInterval = setInterval(() => {
-          if (isCriticalAlert && !isAlertAcknowledged) {
-            const newOscillator = audioContext.createOscillator();
-            const newGainNode = audioContext.createGain();
-            
-            newOscillator.connect(newGainNode);
-            newGainNode.connect(audioContext.destination);
-            
-            newOscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-            newOscillator.type = 'square';
-            newGainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            
-            newOscillator.start(audioContext.currentTime);
-            newOscillator.stop(audioContext.currentTime + 0.2);
-          } else {
-            clearInterval(alarmInterval);
-          }
-        }, 1000);
-        
-        // Store interval reference for cleanup
-        (audioRef as any).current = { interval: alarmInterval, context: audioContext };
-      } catch (error) {
-        console.warn('Audio not available:', error);
-      }
+    if (zoneData.aiConfidence <= 92.5 || isAlertAcknowledged) {
+      return;
     }
-  }, [zoneData.aiConfidence, isCriticalAlert, isAlertAcknowledged]);
+
+    setIsCriticalAlert(true);
+
+    let alarmInterval: ReturnType<typeof setInterval> | null = null;
+    let audioContext: AudioContext | null = null;
+
+    try {
+      audioContext = new AudioContext();
+
+      const playBeep = () => {
+        if (!audioContext) return;
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.frequency.setValueAtTime(800, audioContext.currentTime);
+        osc.type = 'square';
+        gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+        osc.start(audioContext.currentTime);
+        osc.stop(audioContext.currentTime + 0.2);
+      };
+
+      playBeep();
+      alarmInterval = setInterval(playBeep, 1000);
+    } catch (error) {
+      console.warn('Audio not available:', error);
+    }
+
+    return () => {
+      if (alarmInterval) clearInterval(alarmInterval);
+      if (audioContext) audioContext.close();
+    };
+  }, [zoneData.aiConfidence, isAlertAcknowledged]);
 
   // Function to acknowledge and silence the alarm
   const handleAcknowledgeAlert = () => {
     setIsCriticalAlert(false);
     setIsAlertAcknowledged(true);
-    
-    // Stop the audio
-    if ((audioRef as any).current?.interval) {
-      clearInterval((audioRef as any).current.interval);
-    }
-    if ((audioRef as any).current?.context) {
-      (audioRef as any).current.context.close();
-    }
   };
   const zoneName = zoneData.name;
   const riskLevel = zoneData.riskLevel;
@@ -231,7 +209,11 @@ const ZoneInvestigator: React.FC<ZoneInvestigatorProps> = ({
         
         {/* Right Column - Action Plan */}
         <div className="zone-column zone-right">
-          <ActionPlan onSimulateScenario={() => onSimulateScenario(zoneId)} />
+          <ActionPlan
+            aiConfidence={zoneData.aiConfidence}
+            riskLevel={zoneData.riskLevel}
+            onSimulateScenario={() => onSimulateScenario(zoneId)}
+          />
         </div>
       </div>
     </div>

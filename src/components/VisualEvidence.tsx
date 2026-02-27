@@ -53,7 +53,11 @@ const VisualEvidence: React.FC = () => {
               <div 
                 key={point.date}
                 className={`timeline-point ${point.active ? 'active' : ''} ${selectedDate === point.date ? 'selected' : ''}`}
+                role="button"
+                tabIndex={0}
+                aria-label={`View scan from ${point.date}`}
                 onClick={() => setSelectedDate(point.date)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedDate(point.date); } }}
               >
                 <div className="timeline-dot"></div>
                 <div className="timeline-date">{point.date}</div>

@@ -1,12 +1,17 @@
 import React from 'react';
 import { Eye, Activity, Cloud, Brain } from 'lucide-react';
 
+interface PillarMetric {
+  label: string;
+  value: string;
+}
+
 interface PillarData {
   id: string;
   title: string;
   icon: React.ReactNode;
-  line1: string;
-  line2: string;
+  metrics: [PillarMetric, PillarMetric];
+  operationalPercent: number;
   status: 'good' | 'warning' | 'critical';
 }
 
@@ -15,32 +20,44 @@ const pillarsData: PillarData[] = [
     id: 'geospatial',
     title: 'Geospatial Eye',
     icon: <Eye size={24} />,
-    line1: 'Last Drone Scan: 16 Sep 2025, 14:00',
-    line2: 'New Anomalies Detected: 3',
+    metrics: [
+      { label: 'Last Drone Scan', value: '16 Sep 2025, 14:00' },
+      { label: 'New Anomalies Detected', value: '3' }
+    ],
+    operationalPercent: 98,
     status: 'good'
   },
   {
     id: 'vital-signs',
     title: 'Vital Signs Monitor',
     icon: <Activity size={24} />,
-    line1: 'Sensor Network: 498 / 500 Online',
-    line2: 'Max Displacement: 2.1mm (Zone B2)',
+    metrics: [
+      { label: 'Sensor Network', value: '498 / 500 Online' },
+      { label: 'Max Displacement', value: '2.1mm (Zone B2)' }
+    ],
+    operationalPercent: 98,
     status: 'good'
   },
   {
     id: 'environmental',
     title: 'Environmental Trigger',
     icon: <Cloud size={24} />,
-    line1: 'Live Rainfall: 1.2 mm/hr',
-    line2: 'Seismic Activity: Minor (0.2 richter)',
+    metrics: [
+      { label: 'Live Rainfall', value: '1.2 mm/hr' },
+      { label: 'Seismic Activity', value: 'Minor (0.2 richter)' }
+    ],
+    operationalPercent: 98,
     status: 'good'
   },
   {
     id: 'fusion-brain',
     title: 'The Fusion Brain',
     icon: <Brain size={24} />,
-    line1: 'Last Analysis: 52 seconds ago',
-    line2: 'Prediction Model Confidence: 94%',
+    metrics: [
+      { label: 'Last Analysis', value: '52 seconds ago' },
+      { label: 'Prediction Model Confidence', value: '94%' }
+    ],
+    operationalPercent: 94,
     status: 'good'
   }
 ];
@@ -87,22 +104,12 @@ const PillarStatus: React.FC = () => {
             </div>
             
             <div className="pillar-data">
-              <div className="data-line">
-                <span className="data-label">
-                  {pillar.line1.split(':')[0]}:
-                </span>
-                <span className="data-value">
-                  {pillar.line1.split(':').slice(1).join(':')}
-                </span>
-              </div>
-              <div className="data-line">
-                <span className="data-label">
-                  {pillar.line2.split(':')[0]}:
-                </span>
-                <span className="data-value">
-                  {pillar.line2.split(':').slice(1).join(':')}
-                </span>
-              </div>
+              {pillar.metrics.map((metric, i) => (
+                <div key={i} className="data-line">
+                  <span className="data-label">{metric.label}:</span>
+                  <span className="data-value">{metric.value}</span>
+                </div>
+              ))}
             </div>
             
             <div className="pillar-progress">
@@ -110,13 +117,13 @@ const PillarStatus: React.FC = () => {
                 <div 
                   className="progress-fill"
                   style={{ 
-                    width: pillar.id === 'fusion-brain' ? '94%' : '98%',
+                    width: `${pillar.operationalPercent}%`,
                     backgroundColor: getStatusColor(pillar.status)
                   }}
                 ></div>
               </div>
               <span className="progress-label">
-                {pillar.id === 'fusion-brain' ? '94%' : '98%'} Operational
+                {pillar.operationalPercent}% Operational
               </span>
             </div>
           </div>

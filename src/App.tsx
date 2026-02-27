@@ -5,11 +5,11 @@ import ScenarioSimulator from './components/ScenarioSimulator';
 import MobileWorkOrder from './components/MobileWorkOrder';
 import './App.css'
 
-interface CurrentView {
-  type: 'dashboard' | 'zone' | 'simulator' | 'mobile';
-  zoneId?: string;
-  workOrderId?: string;
-}
+type CurrentView =
+  | { type: 'dashboard' }
+  | { type: 'zone'; zoneId: string }
+  | { type: 'simulator'; zoneId: string }
+  | { type: 'mobile'; workOrderId?: string };
 
 function App() {
   const [currentView, setCurrentView] = useState<CurrentView>({ type: 'dashboard' });
@@ -43,14 +43,14 @@ function App() {
         />
       ) : currentView.type === 'zone' ? (
         <ZoneInvestigator 
-          zoneId={currentView.zoneId!} 
+          zoneId={currentView.zoneId} 
           onBack={navigateToDashboard}
           onSimulateScenario={navigateToSimulator}
         />
       ) : currentView.type === 'simulator' ? (
         <ScenarioSimulator 
-          zoneId={currentView.zoneId!} 
-          onBack={() => navigateBackToZone(currentView.zoneId!)} 
+          zoneId={currentView.zoneId} 
+          onBack={() => navigateBackToZone(currentView.zoneId)} 
         />
       ) : (
         <MobileWorkOrder 

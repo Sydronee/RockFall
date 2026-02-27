@@ -24,33 +24,36 @@ const MobileWorkOrder: React.FC<MobileWorkOrderProps> = ({
   const [photoCount, setPhotoCount] = useState(0);
   const [notes, setNotes] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [showNoteInput, setShowNoteInput] = useState(false);
+  const [currentNote, setCurrentNote] = useState('');
 
   const handleAddPhoto = () => {
     setPhotoCount(prev => prev + 1);
     // In real app, would trigger camera/file picker
-    console.log('Camera activated for field photo');
   };
 
   const handleAddNote = () => {
-    const note = prompt('Add field note:');
-    if (note) {
-      setNotes(prev => [...prev, note]);
+    setShowNoteInput(true);
+  };
+
+  const handleSubmitNote = () => {
+    if (currentNote.trim()) {
+      setNotes(prev => [...prev, currentNote.trim()]);
+      setCurrentNote('');
+      setShowNoteInput(false);
     }
   };
 
   const handleMarkComplete = () => {
     setIsCompleted(true);
-    console.log('Work order marked as complete');
     // In real app, would sync to backend
   };
 
   const handleRequestAssistance = () => {
-    console.log('Assistance requested');
     // In real app, would send alert to supervisor
   };
 
   const handleActivateAR = () => {
-    console.log('AR overlay activated');
     // In real app, would launch AR camera view
   };
 
@@ -211,6 +214,48 @@ const MobileWorkOrder: React.FC<MobileWorkOrderProps> = ({
                 <span>Add Note</span>
               </button>
             </div>
+
+            {/* Note Input */}
+            {showNoteInput && (
+              <div style={{ padding: '0.75rem 0' }}>
+                <textarea
+                  value={currentNote}
+                  onChange={(e) => setCurrentNote(e.target.value)}
+                  placeholder="Enter field note..."
+                  rows={3}
+                  autoFocus
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    borderRadius: '8px',
+                    border: '1px solid #444',
+                    background: '#1a1a1a',
+                    color: '#fff',
+                    fontFamily: 'inherit',
+                    fontSize: '0.95rem',
+                    resize: 'vertical',
+                    marginBottom: '0.5rem',
+                  }}
+                />
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    className="add-media-button"
+                    onClick={handleSubmitNote}
+                    style={{ flex: 1 }}
+                  >
+                    <Check size={16} />
+                    <span>Save Note</span>
+                  </button>
+                  <button
+                    className="add-media-button"
+                    onClick={() => { setCurrentNote(''); setShowNoteInput(false); }}
+                    style={{ flex: 1 }}
+                  >
+                    <span>Cancel</span>
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Media Counter */}
             {(photoCount > 0 || notes.length > 0) && (

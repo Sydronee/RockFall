@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import SimulationControls from './SimulationControls.tsx';
-import SimulationOutput from './SimulationOutput.tsx';
+import SimulationControls from './SimulationControls';
+import SimulationOutput from './SimulationOutput';
 
 interface ScenarioSimulatorProps {
   zoneId: string;
@@ -15,6 +15,16 @@ interface SimulationParameters {
   dewatering: boolean;
 }
 
+// Zone data lookup - defined outside component to avoid re-creation on each render
+const simulatorZoneMap: Record<string, { name: string; initialStability: number }> = {
+  zone1: { name: "Haul Road Sector 7", initialStability: 75 },
+  zone2: { name: "North Face - Bench B2", initialStability: 65 },
+  zone3: { name: "South Wall - Bench C4", initialStability: 65 },
+  sector7g: { name: "Sector 7G - Overhang", initialStability: 15 },
+};
+
+const defaultSimulatorZone = { name: "Unknown Zone", initialStability: 50 };
+
 const ScenarioSimulator: React.FC<ScenarioSimulatorProps> = ({ zoneId, onBack }) => {
   const [simulationParams, setSimulationParams] = useState<SimulationParameters>({
     rainfall: 60,
@@ -26,17 +36,7 @@ const ScenarioSimulator: React.FC<ScenarioSimulatorProps> = ({ zoneId, onBack })
   const [isSimulating, setIsSimulating] = useState(false);
   const [hasSimulated, setHasSimulated] = useState(false);
 
-  // Map zone IDs to zone data
-  const getZoneData = (id: string) => {
-    const zoneMap: Record<string, { name: string; initialStability: number }> = {
-      zone1: { name: "Haul Road Sector 7", initialStability: 75 },
-      zone2: { name: "North Face - Bench B2", initialStability: 65 },
-      zone3: { name: "South Wall - Bench C4", initialStability: 65 },
-    };
-    return zoneMap[id] || { name: "Unknown Zone", initialStability: 50 };
-  };
-
-  const zoneData = getZoneData(zoneId);
+  const zoneData = simulatorZoneMap[zoneId] || defaultSimulatorZone;
   const zoneName = zoneData.name;
 
   const updateParameter = (key: keyof SimulationParameters, value: number | boolean) => {

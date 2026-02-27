@@ -43,7 +43,7 @@ const DataAnalysis: React.FC = () => {
     { time: '48h', value: 1.8 }
   ];
 
-  const customTooltip = (props: any) => {
+  const customTooltip = (props: { active?: boolean; payload?: Array<{ value: number }>; label?: string; unit?: string }) => {
     if (props.active && props.payload && props.payload.length) {
       return (
         <div className="chart-tooltip">
